@@ -9,9 +9,23 @@ output_filename = "leaderboard_data.csv"
 
 try:
     response = requests.get(url)
-    response.raise_for_status()  # Raise an exception for bad status codes
+    response.raise_for_status()
 
     soup = BeautifulSoup(response.content, 'html.parser')
+
+    # Output the entire HTML content
+    print("--- Full HTML Content ---")
+    print(soup.prettify())
+    print("--- End of Full HTML Content ---")
+
+    # Check for markdown-accessibility-table elements and print their content
+    markdown_tables = soup.select("markdown-accessibility-table")
+    print(f"\nNumber of markdown-accessibility-table elements found: {len(markdown_tables)}")
+    for i, mt in enumerate(markdown_tables):
+        print(f"--- Content of markdown-accessibility-table[{i}] ---")
+        print(mt.prettify())
+        print("--- End of markdown-accessibility-table content ---")
+
     table = soup.select_one(table_selector)
 
     if table:
