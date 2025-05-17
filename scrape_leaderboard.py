@@ -4,7 +4,7 @@ import csv
 from datetime import datetime
 
 url = "https://github.com/vectara/hallucination-leaderboard"
-table_selector = "markdown-accessibility-table table"
+table_selector = "markdown-accessibility-table > table"
 output_filename = "leaderboard_data.csv"
 
 try:
