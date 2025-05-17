@@ -15,57 +15,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Go
-        uses: actions/setup-go@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          go-version: '1.x'
+          python-version: '3.x'
 
-      - name: Install pup
-        run: go install github.com/ericchiang/pup@latest
-
-      - name: Fetch and extract table data
+      - name: Install dependencies
         run: |
-          echo "Adding Go bin directory to PATH"
-          export PATH="$PATH:$HOME/go/bin"
-          echo "Current PATH: $PATH"
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
 
-          PUP_PATH="$HOME/go/bin/pup"
-          TABLE_SELECTOR='markdown-accessibility-table table'
-          TABLE_OUTPUT="leaderboard_data.csv"
-          USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
-
-          if [ -f "$PUP_PATH" ]; then
-            echo "pup binary found at $PUP_PATH"
-            echo "Attempting to run pup --version"
-            "$PUP_PATH" --version
-            echo "Attempting to run pup with no selector and user-agent..."
-            sleep 5
-            "$PUP_PATH" --user-agent "$USER_AGENT" "https://github.com/vectara/hallucination-leaderboard"
-            echo "Attempting to run pup to get html with user-agent..."
-            "$PUP_PATH" --user-agent "$USER_AGENT" "html" "https://github.com/vectara/hallucination-leaderboard"
-            echo "Attempting to run pup to get title with user-agent..."
-            "$PUP_PATH" --user-agent "$USER_AGENT" "title" "https://github.com/vectara/hallucination-leaderboard"
-            echo "Attempting to run pup to get body with user-agent..."
-            BODY_OUTPUT=$("$PUP_PATH" --user-agent "$USER_AGENT" "body" "https://github.com/vectara/hallucination-leaderboard")
-            echo "pup body output: $BODY_OUTPUT"
-
-            echo "Attempting to run pup to get table with user-agent..."
-            TABLE_OUTPUT_RAW=$("$PUP_PATH" --user-agent "$USER_AGENT" "$TABLE_SELECTOR" "https://github.com/vectara/hallucination-leaderboard")
-            echo "pup table output: $TABLE_OUTPUT_RAW"
-
-            if [ -n "$TABLE_OUTPUT_RAW" ]; then
-              echo "pup ran and produced output for the table. Proceeding with processing."
-              echo "$TABLE_OUTPUT_RAW" | \
-              sed 's/<tr>/,/g;s/<[^>]*>//g;s/,/\n/g' | \
-              awk 'NF > 0' > "$TABLE_OUTPUT"
-            else
-              echo "Error: pup did not produce any output for the table selector."
-              exit 1
-            fi
-          else
-            echo "Error: pup binary not found at $PUP_PATH"
-            exit 1
-          fi
+      - name: Run Python script to fetch data
+        run: python scrape_leaderboard.py
 
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.5.4
