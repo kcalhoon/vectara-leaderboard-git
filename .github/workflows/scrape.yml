@@ -25,20 +25,36 @@ jobs:
 
       - name: Fetch and extract table data
         run: |
+          echo "Adding Go bin directory to PATH"
+          export PATH="$PATH:$HOME/go/bin"
+          echo "Current PATH: $PATH"
+
+          PUP_PATH="$HOME/go/bin/pup"
           TABLE_SELECTOR='markdown-accessibility-table table'
           TABLE_OUTPUT="leaderboard_data.csv"
-          PUP_PATH="$HOME/go/bin/pup"
 
           if [ -f "$PUP_PATH" ]; then
+            echo "pup binary found at $PUP_PATH"
+            echo "Attempting to run pup --version"
+            "$PUP_PATH" --version
             echo "Attempting to run pup to get title..."
             "$PUP_PATH" "title" "https://github.com/vectara/hallucination-leaderboard"
-            echo "Attempting to run pup to get table..."
-            PUP_OUTPUT=$("$PUP_PATH" "$TABLE_SELECTOR" "https://github.com/vectara/hallucination-leaderboard")
-            echo "pup output: $PUP_OUTPUT"
+            echo "Attempting to run pup to get body..."
+            BODY_OUTPUT=$("$PUP_PATH" "body" "https://github.com/vectara/hallucination-leaderboard")
+            echo "pup body output: $BODY_OUTPUT"
+            if [ -n "$BODY_OUTPUT" ]; then
+              echo "pup successfully selected the body."
+            else
+              echo "Error: pup could not select the body."
+            fi
 
-            if [ -n "$PUP_OUTPUT" ]; then
-              echo "pup ran and produced output. Proceeding with processing."
-              echo "$PUP_OUTPUT" | \
+            echo "Attempting to run pup to get table..."
+            TABLE_OUTPUT_RAW=$("$PUP_PATH" "$TABLE_SELECTOR" "https://github.com/vectara/hallucination-leaderboard")
+            echo "pup table output: $TABLE_OUTPUT_RAW"
+
+            if [ -n "$TABLE_OUTPUT_RAW" ]; then
+              echo "pup ran and produced output for the table. Proceeding with processing."
+              echo "$TABLE_OUTPUT_RAW" | \
               sed 's/<tr>/,/g;s/<[^>]*>//g;s/,/\n/g' | \
               awk 'NF > 0' > "$TABLE_OUTPUT"
             else
