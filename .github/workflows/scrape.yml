@@ -28,11 +28,25 @@ jobs:
           TABLE_SELECTOR='markdown-accessibility-table table'
           TABLE_OUTPUT="leaderboard_data.csv"
           PUP_PATH="$HOME/go/bin/pup"
+          DEBUG_OUTPUT="pup_debug.log"
+          DEBUG_ERROR="pup_error.log"
 
           if [ -f "$PUP_PATH" ]; then
-            "$PUP_PATH" "$TABLE_SELECTOR" "https://github.com/vectara/hallucination-leaderboard" | \
-            sed 's/<tr>/,/g;s/<[^>]*>//g;s/,/\n/g' | \
-            awk 'NF > 0' > "$TABLE_OUTPUT"
+            echo "Attempting to run pup..."
+            "$PUP_PATH" "title" "https://github.com/vectara/hallucination-leaderboard" > "$DEBUG_OUTPUT" 2> "$DEBUG_ERROR"
+            cat "$DEBUG_OUTPUT"
+            echo "--- pup error (if any) ---"
+            cat "$DEBUG_ERROR"
+
+            if [ -s "$DEBUG_OUTPUT" ]; then
+              echo "pup ran and produced output. Proceeding with processing."
+              cat "$DEBUG_OUTPUT" | \
+              sed 's/<tr>/,/g;s/<[^>]*>//g;s/,/\n/g' | \
+              awk 'NF > 0' > "$TABLE_OUTPUT"
+            else
+              echo "Error: pup did not produce any output."
+              exit 1
+            fi
           else
             echo "Error: pup binary not found at $PUP_PATH"
             exit 1
