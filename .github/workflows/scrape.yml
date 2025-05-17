@@ -27,10 +27,10 @@ jobs:
         run: |
           TABLE_SELECTOR='markdown-accessibility-table table'
           TABLE_OUTPUT="leaderboard_data.csv"
-          PUP_PATH="$HOME/go/bin/pup" # Explicitly define the path to the pup binary
+          PUP_PATH="$HOME/go/bin/pup"
 
           if [ -f "$PUP_PATH" ]; then
-            "$PUP_PATH" --selector "$TABLE_SELECTOR" "https://github.com/vectara/hallucination-leaderboard" | \
+            "$PUP_PATH" "$TABLE_SELECTOR" "https://github.com/vectara/hallucination-leaderboard" | \
             sed 's/<tr>/,/g;s/<[^>]*>//g;s/,/\n/g' | \
             awk 'NF > 0' > "$TABLE_OUTPUT"
           else
