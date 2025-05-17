@@ -15,24 +15,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install pup
-        run: |
-          go install github.com/ericchiang/pup@latest
-
-      - name: Add SSH key
-        uses: webfactory/ssh-agent@v0.5.4
+      - name: Install Go
+        uses: actions/setup-go@v4
         with:
-          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+          go-version: '1.x' # Use the latest stable Go version
+
+      - name: Install pup
+        run: go install github.com/ericchiang/pup@latest
 
       - name: Fetch and extract table data
         run: |
           TABLE_SELECTOR='markdown-accessibility-table table'
           TABLE_OUTPUT="leaderboard_data.csv"
 
-          curl -s "https://github.com/vectara/hallucination-leaderboard" | \
-          go run github.com/ericchiang/pup --selector "$TABLE_SELECTOR" | \
+          go run github.com/ericchiang/pup --selector "$TABLE_SELECTOR" "https://github.com/vectara/hallucination-leaderboard" | \
           sed 's/<tr>/,/g;s/<[^>]*>//g;s/,/\n/g' | \
           awk 'NF > 0' > "$TABLE_OUTPUT"
+
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
 
       - name: Commit and push if it changed
         run: |
