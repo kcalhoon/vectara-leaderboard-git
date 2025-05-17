@@ -18,7 +18,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.x' # Use the latest stable Go version
+          go-version: '1.x'
 
       - name: Install pup
         run: go install github.com/ericchiang/pup@latest
@@ -27,10 +27,16 @@ jobs:
         run: |
           TABLE_SELECTOR='markdown-accessibility-table table'
           TABLE_OUTPUT="leaderboard_data.csv"
+          PUP_PATH="$HOME/go/bin/pup" # Explicitly define the path to the pup binary
 
-          go run github.com/ericchiang/pup --selector "$TABLE_SELECTOR" "https://github.com/vectara/hallucination-leaderboard" | \
-          sed 's/<tr>/,/g;s/<[^>]*>//g;s/,/\n/g' | \
-          awk 'NF > 0' > "$TABLE_OUTPUT"
+          if [ -f "$PUP_PATH" ]; then
+            "$PUP_PATH" --selector "$TABLE_SELECTOR" "https://github.com/vectara/hallucination-leaderboard" | \
+            sed 's/<tr>/,/g;s/<[^>]*>//g;s/,/\n/g' | \
+            awk 'NF > 0' > "$TABLE_OUTPUT"
+          else
+            echo "Error: pup binary not found at $PUP_PATH"
+            exit 1
+          fi
 
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.5.4
