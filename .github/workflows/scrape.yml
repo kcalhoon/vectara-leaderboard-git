@@ -1,0 +1,41 @@
+name: Scrape latest data
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/60 * * * *'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out this repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install pup
+        run: |
+          go install github.com/ericchiang/pup@latest
+
+      - name: Fetch and extract table data
+        run: |
+          TABLE_SELECTOR='markdown-accessibility-table table'
+          TABLE_OUTPUT="leaderboard_data.csv"
+
+          curl -s "https://github.com/vectara/hallucination-leaderboard" | \
+          go run github.com/ericchiang/pup --selector "$TABLE_SELECTOR" | \
+          sed 's/<tr>/,/g;s/<[^>]*>//g;s/,/\n/g' | \
+          awk 'NF > 0' > "$TABLE_OUTPUT"
+
+      - name: Commit and push if it changed
+        run: |
+          git config user.name "Automated"
+          git config user.email "actions@users.noreply.github.com"
+          git add leaderboard_data.csv
+          timestamp=$(date -u)
+          if ! git diff --staged --quiet; then
+            git commit -m "Latest leaderboard data: ${timestamp}"
+            git push
+          fi
