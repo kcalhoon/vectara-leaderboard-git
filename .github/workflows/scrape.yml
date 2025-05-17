@@ -42,6 +42,7 @@ jobs:
           timestamp=$(date -u)
           if ! git diff --staged --quiet; then
             git commit -m "Latest leaderboard data: ${timestamp}"
-            git remote set-url origin git@github.com:${{ github.repository }} # Use SSH URL
+            git remote set-url origin git@github.com:${{ github.repository }}
+            git pull --rebase origin ${{ github.ref_name }} || echo "No remote changes to pull"
             git push origin HEAD:${{ github.ref_name }}
           fi
