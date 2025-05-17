@@ -19,6 +19,11 @@ jobs:
         run: |
           go install github.com/ericchiang/pup@latest
 
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+
       - name: Fetch and extract table data
         run: |
           TABLE_SELECTOR='markdown-accessibility-table table'
@@ -37,5 +42,6 @@ jobs:
           timestamp=$(date -u)
           if ! git diff --staged --quiet; then
             git commit -m "Latest leaderboard data: ${timestamp}"
-            git push
+            git remote set-url origin git@github.com:${{ github.repository }} # Use SSH URL
+            git push origin HEAD:${{ github.ref_name }}
           fi
