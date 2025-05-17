@@ -32,23 +32,25 @@ jobs:
           PUP_PATH="$HOME/go/bin/pup"
           TABLE_SELECTOR='markdown-accessibility-table table'
           TABLE_OUTPUT="leaderboard_data.csv"
+          USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
           if [ -f "$PUP_PATH" ]; then
             echo "pup binary found at $PUP_PATH"
             echo "Attempting to run pup --version"
             "$PUP_PATH" --version
-            echo "Attempting to run pup with no selector..."
-            "$PUP_PATH" "https://github.com/vectara/hallucination-leaderboard"
-            echo "Attempting to run pup to get html..."
-            "$PUP_PATH" "html" "https://github.com/vectara/hallucination-leaderboard"
-            echo "Attempting to run pup to get title..."
-            "$PUP_PATH" "title" "https://github.com/vectara/hallucination-leaderboard"
-            echo "Attempting to run pup to get body..."
-            BODY_OUTPUT=$("$PUP_PATH" "body" "https://github.com/vectara/hallucination-leaderboard")
+            echo "Attempting to run pup with no selector and user-agent..."
+            sleep 5
+            "$PUP_PATH" --user-agent "$USER_AGENT" "https://github.com/vectara/hallucination-leaderboard"
+            echo "Attempting to run pup to get html with user-agent..."
+            "$PUP_PATH" --user-agent "$USER_AGENT" "html" "https://github.com/vectara/hallucination-leaderboard"
+            echo "Attempting to run pup to get title with user-agent..."
+            "$PUP_PATH" --user-agent "$USER_AGENT" "title" "https://github.com/vectara/hallucination-leaderboard"
+            echo "Attempting to run pup to get body with user-agent..."
+            BODY_OUTPUT=$("$PUP_PATH" --user-agent "$USER_AGENT" "body" "https://github.com/vectara/hallucination-leaderboard")
             echo "pup body output: $BODY_OUTPUT"
 
-            echo "Attempting to run pup to get table..."
-            TABLE_OUTPUT_RAW=$("$PUP_PATH" "$TABLE_SELECTOR" "https://github.com/vectara/hallucination-leaderboard")
+            echo "Attempting to run pup to get table with user-agent..."
+            TABLE_OUTPUT_RAW=$("$PUP_PATH" --user-agent "$USER_AGENT" "$TABLE_SELECTOR" "https://github.com/vectara/hallucination-leaderboard")
             echo "pup table output: $TABLE_OUTPUT_RAW"
 
             if [ -n "$TABLE_OUTPUT_RAW" ]; then
