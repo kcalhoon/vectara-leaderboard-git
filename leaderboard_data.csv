@@ -11,6 +11,7 @@ amazon/nova-pro-v1:0,5.1 %,94.9 %,99.3 %,66.2
 amazon/nova-2-lite-v1:0,5.1 %,94.9 %,99.6 %,94.1
 mistralai/mistral-small-2501,5.1 %,94.9 %,97.9 %,98.8
 ibm-granite/granite-4.0-h-small,5.2 %,94.8 %,100.0 %,107.4
+ai21labs/jamba-mini-2,5.3 %,94.7 %,99.6 %,109.4
 deepseek-ai/DeepSeek-V3.2-Exp,5.3 %,94.7 %,96.6 %,64.6
 qwen/qwen3-14b,5.4 %,94.6 %,99.9 %,111.1
 amazon/nova-micro-v1:0,5.5 %,94.5 %,100.0 %,100.0
